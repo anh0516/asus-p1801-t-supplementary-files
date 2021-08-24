@@ -1,0 +1,29 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-asus-p1801-t
+pkgdesc="Asus Transformer AiO P1801-T"
+pkgver=3.1.10
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	linux-asus-p1801-t
+	mesa-dri-gallium
+	mkbootimg
+	postmarketos-base
+"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+41c3a662f8e7ef008024baf248057231911e629b40bc7684c13affbec267c5c5bb99fa13ab1b8e85b79c4c716835b9682e4ed17891249b1cc7355a9286b71ce3  deviceinfo
+"

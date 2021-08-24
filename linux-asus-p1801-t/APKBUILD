@@ -1,0 +1,64 @@
+# Reference: <https://postmarketos.org/vendorkernel>
+# Kernel config based on: arch/arm/configs/(CHANGEME!)
+
+pkgname=linux-asus-p1801-t
+pkgver=3.1.10
+pkgrel=0
+pkgdesc="Asus Transformer AiO P1801-T kernel fork"
+arch="armv7"
+_carch="arm"
+_flavor="asus-p1801-t"
+url="https://kernel.org"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="
+	bash
+	bc
+	bison
+	devicepkg-dev
+	flex
+	openssl-dev
+	perl
+	gcc4
+"
+# Compiler: GCC4 (doesn't boot when compiled with newer versions)
+if [ "${CC:0:5}" != "gcc4-" ]; then
+	CC="gcc4-$CC"
+	HOSTCC="gcc4-gcc"
+	CROSS_COMPILE="gcc4-$CROSS_COMPILE"
+fi
+
+# Source
+_repository="asus-p1801-t-kernel"
+_commit="a1656eb93cbb0b1ccabf22387d27f1fe059c2ffb"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_commit.tar.gz::https://github.com/anh0516/$_repository/archive/$_commit.tar.gz
+	$_config
+	kernel-use-the-gnu89-standard-explicitly.patch
+"
+
+builddir="$srcdir/$_repository-$_commit"
+_outdir="out"
+
+prepare() {
+	default_prepare
+	. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make O="$_outdir" ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor" "$_outdir"
+}
+
+
+sha512sums="
+4c4ff085d81008bfc59c55bb487a5713baee9ee9c52bfb406605cba257123ad2accceb42320b60a66fdeb0448322f51858a010e22fbef6ad9454f16edd69b00d  linux-asus-p1801-t-a1656eb93cbb0b1ccabf22387d27f1fe059c2ffb.tar.gz
+7f2e90cb8bff6ce0576df698939a521ed5367bc19856a0839d5f77dfe9d1f3e69dbc213303dec28af5e16b97fb3683d461c6b4f38b2dba73d7e0d1362973ee09  config-asus-p1801-t.armv7
+ad0182a483791fc88e058838bc331b2f04a75ba291e763767babdb815efadfc3b4fda97e69e2e3f00a426cabea088e35297a92bd287592597d1e309be68ee92c  kernel-use-the-gnu89-standard-explicitly.patch
+"
